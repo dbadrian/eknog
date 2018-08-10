@@ -177,7 +177,7 @@ class Trainer():
         logger.info("###############################################################")
 
         for eval_name, eval_func, ops, iterators, prep_ops in self.validation_ops:
-            logger.info(">>>Running eval mode:", eval_name)
+            logger.info(">>>Running eval mode: {}".format(eval_name))
             if prep_ops is not None:
                 logger.info("Running prep_ops...")
                 self.session.run(prep_ops)

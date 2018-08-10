@@ -19,6 +19,7 @@ from .BaseModel import BaseModel
 from .ComplEx import ComplEx
 from .DistMult import DistMult
 from .TorusE import TorusE
+from .Analogy import Analogy
 from .TransE import TransE
 
 __all__ = ['BaseModel',
@@ -26,4 +27,5 @@ __all__ = ['BaseModel',
            'TorusE',
            'ComplEx',
            'DistMult',
+           'Analogy'
            ]

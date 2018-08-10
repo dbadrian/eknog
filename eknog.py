@@ -91,6 +91,7 @@ def train(args):
         raise ModelInvalid
 
     optimizer = "AdamOptimizer"
+    # optimizer = "AdagradOptimizer"
     if args.optimizer_params:
         if "optimizer" in args.optimizer_params:
             optimizer = args.optimizer_params["optimizer"]
@@ -99,7 +100,7 @@ def train(args):
         optimizer_settings = args.optimizer_params
     else:
         optimizer_settings = {
-            "learning_rate": 0.001
+            "learning_rate": 0.003
         }
 
     # Generate a TF-Session Confg (e.g., to activate debug mode)
