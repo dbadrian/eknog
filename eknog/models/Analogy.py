@@ -25,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 class Analogy(BaseModel):
     def __init__(self,
-                 entity_wd=None, entity_wd_type="L2",
-                 rel_wd=None, rel_wd_type="L2",
+                 wd=None, wd_type="L2",
                  label_smoothing=0.0,
                  neg_rel_ratio=0.5,
                  num_scalar=100,
@@ -50,9 +49,8 @@ class Analogy(BaseModel):
 
         self.loss = self._standard_loss
 
-        entity_wd_func = tf_ops.select_norm_by_string(
-            self.config["entity_wd_type"])
-        rel_wd_func = tf_ops.select_norm_by_string(self.config["rel_wd_type"])
+        wd_func = tf_ops.select_norm_by_string(
+            self.config["wd_type"])
 
         # These are basically mandatory variables
         with tf.name_scope("embeddings"):
@@ -70,14 +68,14 @@ class Analogy(BaseModel):
                 name="entity_embeddings",
                 shape=[self.dataset.n_entities,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["entity_wd"], wd_func=entity_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
             self.relation_embeddings = self._add_variable(
                 name="relation_embeddings",
                 shape=[self.dataset.n_relations,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["rel_wd"], wd_func=rel_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
         self._add_evaluation_func("Structure-Ranks", self.rank,
