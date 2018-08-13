@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 class ComplEx(BaseModel):
     # TODO: ADD ORIGINAL PAPER LINK, DESCRIBE MODEL IN FEW WORDS
     def __init__(self, initialize_uniform=False, emb_dropout=0.0,
-                 entity_wd=None, entity_wd_type="L2",
-                 rel_wd=None, rel_wd_type="L2",
+                 wd=None, wd_type="L2",
                  neg_rel_ratio=0.5,
                  sample_negative_relations=False, k_negative_samples=30,
                  **kwargs):
@@ -53,37 +52,36 @@ class ComplEx(BaseModel):
             "trainable": True
         }
 
-        entity_wd_func = tf_ops.select_norm_by_string(
-            self.config["entity_wd_type"])
-        rel_wd_func = tf_ops.select_norm_by_string(self.config["rel_wd_type"])
+        wd_func = tf_ops.select_norm_by_string(
+            self.config["wd_type"])
 
         with tf.name_scope("embeddings"):
             self.entity_embeddings_real = self._add_variable(
                 name="entity_embeddings_real",
                 shape=[self.dataset.n_entities,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["entity_wd"], wd_func=entity_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
             self.entity_embeddings_imag = self._add_variable(
                 name="entity_embeddings_imag",
                 shape=[self.dataset.n_entities,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["entity_wd"], wd_func=entity_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
             self.relation_embeddings_real = self._add_variable(
                 name="relation_embeddings_real",
                 shape=[self.dataset.n_relations,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["rel_wd"], wd_func=rel_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
             self.relation_embeddings_imag = self._add_variable(
                 name="relation_embeddings_imag",
                 shape=[self.dataset.n_relations,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["rel_wd"], wd_func=rel_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
         self._add_evaluation_func("Structure-Ranks", self.rank,

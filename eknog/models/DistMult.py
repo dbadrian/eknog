@@ -25,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 class DistMult(BaseModel):
     def __init__(self,
-                 entity_wd=None, entity_wd_type="L2",
-                 rel_wd=None, rel_wd_type="L2",
+                 wd=None, wd_type="L2",
                  label_smoothing=0.0,
                  neg_rel_ratio=0.5,
                  sample_negative_relations=False, emb_dropout=0.0,
@@ -47,14 +46,9 @@ class DistMult(BaseModel):
                                                                                "embedding_dimension"],
                                                                            arg_right=arg_right)
 
-        if self.config["loss_type"] == "BCE":
-            self.loss = self._bce_loss
-        else:
-            self.loss = self._standard_loss
 
-        entity_wd_func = tf_ops.select_norm_by_string(
-            self.config["entity_wd_type"])
-        rel_wd_func = tf_ops.select_norm_by_string(self.config["rel_wd_type"])
+        wd_func = tf_ops.select_norm_by_string(
+            self.config["wd_type"])
 
         # These are basically mandatory variables
         with tf.name_scope("embeddings"):
@@ -72,43 +66,20 @@ class DistMult(BaseModel):
                 name="entity_embeddings",
                 shape=[self.dataset.n_entities,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["entity_wd"], wd_func=entity_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
             self.relation_embeddings = self._add_variable(
                 name="relation_embeddings",
                 shape=[self.dataset.n_relations,
                        self.config["embedding_dimension"]],
-                weight_decay=self.config["rel_wd"], wd_func=rel_wd_func,
+                weight_decay=self.config["wd"], wd_func=wd_func,
                 **variable_init_params)
 
         self._add_evaluation_func("Structure-Ranks", self.rank,
                                   'TransE-Ranking')
 
-    def _bce_loss(self, head_rel_ids, logit_mask):
-        head_ids = head_rel_ids[:, 0]
-        rel_ids = head_rel_ids[:, 1]
-
-        head_emb = tf_ops.emb_lookup(self.entity_embeddings, head_ids,
-                                     dropout=1 - self.config["emb_dropout"])
-        rel_emb = tf_ops.emb_lookup(self.relation_embeddings, rel_ids,
-                                    dropout=1 - self.config["emb_dropout"])
-
-        left = tf.multiply(head_emb, rel_emb)
-
-        logit_mask = ((1.0 - self.config["label_smoothing"]) * tf.cast(
-            logit_mask,
-            dtype=tf.float32)) + (
-                             1.0 / self.dataset.n_entities)
-
-        obj = tf.nn.dropout(self.entity_embeddings,
-                            1.0 - self.config["emb_dropout"])
-
-        scores = tf.einsum("bd,nd->bn", left, obj)
-
-        return self._loss_out(scores, logit_mask)
-
-    def _standard_loss(self, positive_triplets):
+    def loss(self, positive_triplets):
         """
         Returns a loss variable which can be optimized.
         :param positive_triplets: A batch (2D Tensor) of positive triplets.

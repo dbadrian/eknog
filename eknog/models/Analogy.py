@@ -36,17 +36,6 @@ class Analogy(BaseModel):
         self._model_initialization(BaseModel, locals(), self.__define_model)
 
     def __define_model(self):
-        # For reuse in child-models
-        # self.score_func = lambda arg0, arg1, arg2, shape_right, n_dim=None, arg_right=2: tf_ops.trilinear_dot_product(arg0,
-        #                                                                    arg1,
-        #                                                                    arg2,
-        #                                                                    shape_right=shape_right,
-        #                                                                    n_dim=n_dim,
-        #                                                                    d_dim=
-        #                                                                    self.config[
-        #                                                                        "embedding_dimension"],
-        #                                                                    arg_right=arg_right)
-
         self.loss = self._standard_loss
 
         wd_func = tf_ops.select_norm_by_string(
